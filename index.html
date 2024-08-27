@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real time chat app(No Databese)</title>
+    <style> 
+    body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .chat-container {
+            width: 60%;
+            height: 80%;
+            background-color: #111;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-logo {
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            background-color: #00ff00;
+            color: #000;
+        }
+
+        .chat-history {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #444;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-input {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background-color: #111;
+            border-top: 1px solid #444;
+        }
+
+        .chat-input input {
+            width: 70%;
+            padding: 15px;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            outline: none;
+            font-size: 16px;
+            background-color: #222;
+            color: #fff;
+        }
+
+        .chat-input button {
+            margin-left: 10px;
+            padding: 15px 30px;
+            background-color: #00ff00;
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .chat-input button:hover {
+            background-color: #009900;
+        }
+
+        .chat-message {
+            max-width: 60%;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            border: 1px solid #00ff00;
+            word-wrap: break-word;
+        }
+
+        .client-message {
+            background-color: #00ff00;
+            color: #000;
+            align-self: flex-end;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .server-message {
+            background-color: #444;
+            color: #fff;
+            align-self: flex-start;
+            text-align: left;
+            margin-right: auto;
+        }
+    </style>
+    
+</head>
+<body>
+  
+    
+    <div class="chat-container">
+        <div class="chat-logo">
+           <h1> M-CHAT</h1>
+        </div>
+        <div class="chat-history" id="chat-history">
+            <!-- Chat messages will be appended here -->
+             <h4 id="nameA"> </h4>
+             <ul id="msgHis"></ul>
+        </div>
+
+
+
+
+
+
+        <div class="chat-input">
+            <input type="text" id="msg" placeholder="Type a message..." />
+            <button onclick="send()" id="send-btn">Send</button>
+        </div>
+    </div>
+    <script
+        src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket= io();
+        let name ;
+        do {
+            name=prompt('please enter you nick name')
+
+        } while(!name)
+
+      
+    
+        function send() {
+    let msg = {
+        user: name,
+        message: document.getElementById('msg').value
+    };
+    socket.emit('chat', msg);
+    document.getElementById('msg').value = '';
+}
+       
+        socket.on('chat_transfer', function(msg) {
+    let listItem = document.createElement('li');
+    listItem.className = msg.user === name ? 'client-message' : 'server-message';
+    
+    // Display the user name followed by the message
+    listItem.innerHTML = `<strong>${msg.user}:</strong> ${msg.message}`;
+    
+    document.getElementById('msgHis').appendChild(listItem);
+});
+
+
+
+socket.on('user-connected', function(name) {
+        let listItem = document.createElement('li');
+        listItem.className = 'server-message';
+        listItem.textContent = `${name} has joined the chat.`;
+        document.getElementById('msgHis').appendChild(listItem);
+    });
+
+
+
+
+    // Handle user-disconnected event
+    socket.on('user-disconnected', function(name) {
+        let listItem = document.createElement('li');
+        listItem.className = 'server-message';
+        listItem.textContent = `${name} has left the chat.`;
+        document.getElementById('msgHis').appendChild(listItem);
+    });
+
+
+
+        
+        
+        
+    </script>
+
+
+    
+</body>
+</html>
